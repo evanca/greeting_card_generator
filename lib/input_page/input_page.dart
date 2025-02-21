@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:greeting_card_generator_sandbox/functions/functions_service.dart';
+import 'package:greeting_card_generator_sandbox/greeting/greeting_controller.dart';
 import 'package:greeting_card_generator_sandbox/output_page/output_page.dart';
 import 'package:greeting_card_generator_sandbox/ui/theme.dart';
 
@@ -15,6 +17,8 @@ class InputPage extends StatefulWidget {
 }
 
 class _InputPageState extends State<InputPage> {
+  static const String _errorText = 'Oops! Something went wrong. '
+      'Please try again!';
   static const _imageOffset = 48.0;
   final _formKey = GlobalKey<FormState>();
   String _recipientName = '';
@@ -23,7 +27,7 @@ class _InputPageState extends State<InputPage> {
   double _tone = 0.5;
   String? _additionalNotes;
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final formInput = FormInput(
@@ -33,15 +37,30 @@ class _InputPageState extends State<InputPage> {
         tone: _tone,
         additionalNotes: _additionalNotes,
       );
-      // TODO: Generate greeting card
+
+      GreetingController.instance.setError(null);
+
+      FunctionsService().generateGreetingText(formInput).then((output) {
+        if (output != null) {
+          GreetingController.instance.setGreetingText(output);
+        } else {
+          GreetingController.instance.setError(_errorText);
+        }
+      });
+
+      FunctionsService().generateImage(formInput).then((image) {
+        if (image != null) {
+          GreetingController.instance.setGreetingImage(image);
+        } else {
+          GreetingController.instance.setError(_errorText);
+        }
+      });
+
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => const OutputPage(),
         ),
       );
-      if (kDebugMode) {
-        print(formInput);
-      }
     }
   }
 

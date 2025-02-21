@@ -14,13 +14,15 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@genkit-ai/dotprompt": "^0.9.12",
     "@genkit-ai/googleai": "1.0.0-rc.12",
+    "@genkit-ai/vertexai": "^1.0.4",
     "firebase-admin": "^13.0.2",
     "firebase-functions": "^6.3.0"
   },
   "devDependencies": {
-    "typescript": "^4.9.0",
-    "firebase-functions-test": "^3.1.0"
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^4.9.0"
   },
   "private": true
 }

@@ -1,0 +1,26 @@
+---
+model: googleai/gemini-1.5-flash
+input:
+  schema:
+    tone: number
+    occasion: string
+    recipientName: string
+    age?: number
+    additionalNotes?: string
+  default:
+    tone: 0.5
+---
+Write a {{tone}}-toned text prompt for generating a {{occasion}} digital greeting card.
+
+Recipient details: Their name is {{recipientName}}{{#if age}}, age {{age}}{{/if}}.
+{{#if additionalNotes}}Additional context: {{additionalNotes}}.{{/if}}
+
+Rules:
+Match the tone scale, where 0.0 is very casual and 1.0 is very formal.
+Incorporate the provided personal details for specificity.
+Consider both the occasion and the recipient’s personal context.
+The main subject(s) should be clearly depicted against a background. You decide what the subjects are (a cake, a creature, a landscape, etc.).
+Note that the image model has no reasoning, so be specific about the image you want (e.g., "Illustration of a mythical wyvern flying over mountains").
+Do not include any text, banners or titles in the image.
+
+Output only the resulting prompt.

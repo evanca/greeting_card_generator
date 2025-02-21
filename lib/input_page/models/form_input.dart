@@ -14,4 +14,14 @@ class FormInput {
     required this.tone,
     this.additionalNotes,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'recipientName': recipientName,
+      'age': age,
+      'occasion': occasion.label,
+      'tone': tone,
+      'additionalNotes': additionalNotes,
+    };
+  }
 }
