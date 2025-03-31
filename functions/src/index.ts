@@ -1,5 +1,5 @@
 // import the Genkit and Google AI plugin libraries
-import {gemini15Flash, googleAI} from '@genkit-ai/googleai';
+import {gemini20Flash, googleAI} from '@genkit-ai/googleai';
 import {genkit} from 'genkit';
 import {defineSecret} from 'firebase-functions/params';
 import {isSignedIn, onCallGenkit} from 'firebase-functions/https';
@@ -11,7 +11,7 @@ const googleAIapiKey = defineSecret('GOOGLE_GENAI_API_KEY');
 // configure a Genkit instance
 const ai = genkit({
   plugins: [googleAI(), vertexAI({location: 'us-central1'}),],
-  model: gemini15Flash, // set default model
+  model: gemini20Flash, // set default model
 });
 
 export const GreetingSchema = z.object({

@@ -14,9 +14,9 @@
   },
   "main": "lib/index.js",
   "dependencies": {
-    "@genkit-ai/dotprompt": "^0.9.12",
-    "@genkit-ai/googleai": "1.0.0-rc.12",
-    "@genkit-ai/vertexai": "^1.0.4",
+    "@genkit-ai/googleai": "^1.4.0",
+    "@genkit-ai/vertexai": "^1.4.0",
+    "dotprompt": "^1.0.1",
     "firebase-admin": "^13.0.2",
     "firebase-functions": "^6.3.0"
   },
