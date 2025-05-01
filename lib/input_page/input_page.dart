@@ -26,9 +26,10 @@ class _InputPageState extends State<InputPage> {
   double _tone = 0.5;
   String? _additionalNotes;
 
-  Future<void> _submitForm() async {
+  _submitForm() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+
       final formInput = FormInput(
         recipientName: _recipientName,
         age: _age,
@@ -37,7 +38,7 @@ class _InputPageState extends State<InputPage> {
         additionalNotes: _additionalNotes,
       );
 
-      await GreetingController.instance.generateGreeting(formInput, _errorText);
+      GreetingController.instance.generateGreeting(formInput, _errorText);
 
       Navigator.of(context).push(
         MaterialPageRoute(
