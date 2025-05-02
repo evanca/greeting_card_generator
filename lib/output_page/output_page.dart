@@ -8,31 +8,30 @@ import 'package:image_downloader_web/image_downloader_web.dart';
 import 'package:screenshot/screenshot.dart';
 
 class OutputPage extends StatefulWidget {
-  const OutputPage({super.key});
+  const OutputPage({
+    super.key,
+    required this.greetingController,
+  });
+
+  final GreetingController greetingController;
 
   @override
   State<OutputPage> createState() => _OutputPageState();
 }
 
 class _OutputPageState extends State<OutputPage> {
-  final _screenshotController = ScreenshotController();
-  late bool _isTakingScreenshot;
-
-  @override
-  void initState() {
-    _isTakingScreenshot = false;
-    super.initState();
-  }
+  final screenshotController = ScreenshotController();
+  bool isTakingScreenshot = false;
 
   void _toggleIsTakingScreenshot() {
     setState(() {
-      _isTakingScreenshot = !_isTakingScreenshot;
+      isTakingScreenshot = !isTakingScreenshot;
     });
   }
 
   Future<void> _handleScreenshot() async {
     _toggleIsTakingScreenshot();
-    Uint8List? screenshot = await _screenshotController.capture();
+    Uint8List? screenshot = await screenshotController.capture();
 
     if (screenshot != null) {
       await WebImageDownloader.downloadImageFromUInt8List(
@@ -43,6 +42,12 @@ class _OutputPageState extends State<OutputPage> {
     _toggleIsTakingScreenshot();
   }
 
+  void _handleStartOver() {
+    widget.greetingController.setGreetingText('');
+    widget.greetingController.setGreetingImage(null);
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,33 +56,32 @@ class _OutputPageState extends State<OutputPage> {
         decoration: AppTheme.gradientDecoration,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            double maxWidth = constraints.maxWidth;
-            bool isMobile = maxWidth <= 600;
-            double cardWidth = isMobile ? maxWidth * 0.9 : 900;
+            final maxWidth = constraints.maxWidth;
+            final isMobile = maxWidth <= 600;
+            final double cardWidth = isMobile ? maxWidth * 0.9 : 900;
 
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Flexible(
                   child: Screenshot(
-                    controller: _screenshotController,
+                    controller: screenshotController,
                     child: Container(
                       width: cardWidth,
                       margin: const EdgeInsets.symmetric(vertical: 32),
                       padding: const EdgeInsets.all(8),
                       decoration: AppTheme.cardDecoration,
-                      child: GreetingCard(isMobile: isMobile),
+                      child: GreetingCard(
+                        isMobile: isMobile,
+                        greetingController: widget.greetingController,
+                      ),
                     ),
                   ),
                 ),
                 ButtonsSection(
                   isMobile: isMobile,
                   onSave: _handleScreenshot,
-                  onStartOver: () {
-                    GreetingController.instance.setGreetingText('');
-                    GreetingController.instance.setGreetingImage(null);
-                    Navigator.pop(context);
-                  },
+                  onStartOver: _handleStartOver,
                 ),
               ],
             );
@@ -155,107 +159,120 @@ class GreetingCard extends StatelessWidget {
   const GreetingCard({
     super.key,
     required this.isMobile,
+    required this.greetingController,
   });
 
   final bool isMobile;
+  final GreetingController greetingController;
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-        listenable: GreetingController.instance,
-        builder: (context, _) {
-          if (GreetingController.instance.isLoading) {
-            return const Center(
-              child: SizedBox(
-                  height: 80, width: 80, child: CircularProgressIndicator()),
-            );
-          }
+      listenable: greetingController,
+      builder: (context, _) {
+        if (greetingController.isLoading) {
+          return const Center(
+            child: SizedBox(
+              height: 80,
+              width: 80,
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else if (greetingController.error != null) {
+          return Center(
+            child: Text(
+              greetingController.error!,
+              style: GoogleFonts.lato(
+                textStyle: Theme.of(context).textTheme.headlineMedium,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
+        }
 
-          else if (GreetingController.instance.error != null) {
-            return Center(
-              child: Text(
-                GreetingController.instance.error!,
-                style: GoogleFonts.lato(
-                  textStyle: Theme.of(context).textTheme.headlineMedium,
-                  fontWeight: FontWeight.w600,
+        final greetingText = greetingController.greetingText ?? '';
+        final greetingImage = greetingController.greetingImage;
+
+        if (isMobile) {
+          return Container(
+            height: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: Image.memory(greetingImage!).image,
+                fit: BoxFit.fill,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              children: [
+                const Spacer(),
+                GreetingText(
+                  text: greetingText,
+                  darkMode: true,
                 ),
-              ),
-            );
-          }
+                const Spacer(),
+              ],
+            ),
+          );
+        }
 
-          if (isMobile) {
-            return Container(
-              height: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image:
-                      Image.memory(GreetingController.instance.greetingImage!)
-                          .image,
-                  fit: BoxFit.fill,
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Column(
-                children: [
-                  Spacer(),
-                  GreetingText(darkMode: true),
-                  Spacer(),
-                ],
-              ),
-            );
-          }
-
-          return Row(
-            children: [
-              Expanded(
-                child: AspectRatio(
-                  aspectRatio: 2 / 3,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.memory(
-                      GreetingController.instance.greetingImage!,
-                      height: double.infinity,
-                      fit: BoxFit.fitHeight,
-                      alignment: Alignment.center,
-                    ),
+        return Row(
+          children: [
+            Expanded(
+              child: AspectRatio(
+                aspectRatio: 2 / 3,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.memory(
+                    greetingImage!,
+                    height: double.infinity,
+                    fit: BoxFit.fitHeight,
+                    alignment: Alignment.center,
                   ),
                 ),
               ),
-              const Expanded(child: GreetingText()),
-            ],
-          );
-        });
+            ),
+            Expanded(
+              child: GreetingText(
+                text: greetingText,
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
 class GreetingText extends StatelessWidget {
-  const GreetingText({super.key, this.darkMode = false});
+  const GreetingText({
+    super.key,
+    required this.text,
+    this.darkMode = false,
+  });
+
+  final String text;
 
   /// Used when text is displayed above the card image.
   final bool darkMode;
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: GreetingController.instance,
-      builder: (context, _) {
-        return ColoredBox(
-          color: darkMode ? Palette.cardOverlay : Colors.transparent,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 48),
-            child: Text(
-              GreetingController.instance.greetingText!,
-              style: GoogleFonts.lato(
-                textStyle: Theme.of(context).textTheme.headlineMedium,
-                fontWeight: FontWeight.w600,
-                color: darkMode ? Colors.white : Palette.labelText,
-              ),
-              textAlign: TextAlign.center,
-            ),
+    return ColoredBox(
+      color: darkMode ? Palette.cardOverlay : Colors.transparent,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 48),
+        child: Text(
+          text,
+          style: GoogleFonts.lato(
+            textStyle: Theme.of(context).textTheme.headlineMedium,
+            fontWeight: FontWeight.w600,
+            color: darkMode ? Colors.white : Palette.labelText,
           ),
-        );
-      },
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 }

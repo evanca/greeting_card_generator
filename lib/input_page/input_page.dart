@@ -42,7 +42,9 @@ class _InputPageState extends State<InputPage> {
 
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => const OutputPage(),
+          builder: (context) => OutputPage(
+            greetingController: GreetingController.instance,
+          ),
         ),
       );
     }
