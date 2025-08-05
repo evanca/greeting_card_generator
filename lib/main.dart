@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:greeting_card_generator_sandbox/ui/theme.dart';
 
 import 'app/auth_service.dart';
-import 'functions/functions_service.dart';
 import 'input_page/input_page.dart';
 
 Future<void> main() async {
@@ -15,8 +14,6 @@ Future<void> main() async {
   );
 
   await AuthService(app: app).signInAnonymously();
-
-  FunctionsService().helloGemini();
 
   runApp(const MyApp());
 }
