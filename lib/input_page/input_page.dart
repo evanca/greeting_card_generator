@@ -15,6 +15,8 @@ class InputPage extends StatefulWidget {
 }
 
 class _InputPageState extends State<InputPage> {
+  static const String _errorText = 'Oops! Something went wrong. '
+      'Please try again!';
   static const _imageOffset = 48.0;
   final _formKey = GlobalKey<FormState>();
   String _recipientName = '';
