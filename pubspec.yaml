@@ -38,9 +38,9 @@ dependencies:
   google_fonts: ^6.2.1
   screenshot: ^3.0.0
   image_downloader_web: ^2.0.6
-  firebase_core: ^3.11.0
-  cloud_functions: ^5.3.2
-  firebase_auth: ^5.4.2
+  firebase_core: ^4.0.0
+  cloud_functions: ^6.0.0
+  firebase_auth: ^6.0.0
 
 dev_dependencies:
   flutter_test:
