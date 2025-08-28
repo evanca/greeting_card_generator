@@ -6,6 +6,8 @@ import 'package:greeting_card_generator_sandbox/ui/theme.dart';
 import 'package:image_downloader_web/image_downloader_web.dart';
 import 'package:screenshot/screenshot.dart';
 
+import '../greeting/greeting_controller.dart';
+
 class OutputPage extends StatefulWidget {
   const OutputPage({super.key});
 
@@ -156,72 +158,96 @@ class GreetingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isMobile) {
-      return Container(
-        height: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          image: const DecorationImage(
-            image: AssetImage('assets/card.png'),
-            fit: BoxFit.fill,
-          ),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: const Column(
-          children: [
-            Spacer(),
-            GreetingText(darkMode: true),
-            Spacer(),
-          ],
-        ),
-      );
-    }
-
-    return Row(
-      children: [
-        Expanded(
-          child: AspectRatio(
-            aspectRatio: 2 / 3,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.asset(
-                'assets/card.png',
-                height: double.infinity,
-                fit: BoxFit.fitHeight,
-                alignment: Alignment.bottomLeft,
+    return ListenableBuilder(
+        listenable: GreetingController.instance,
+        builder: (context, _) {
+          if (GreetingController.instance.isLoading) {
+            return const Center(
+              child: SizedBox(
+                  height: 80, width: 80, child: CircularProgressIndicator()),
+            );
+          } else if (GreetingController.instance.error != null) {
+            return Center(
+              child: Text(
+                GreetingController.instance.error!,
+                style: GoogleFonts.lato(
+                  textStyle: Theme.of(context).textTheme.headlineMedium,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ),
-        ),
-        const Expanded(child: GreetingText()),
-      ],
-    );
+            );
+          }
+          if (isMobile) {
+            return Container(
+              height: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image:
+                      Image.memory(GreetingController.instance.greetingImage!)
+                          .image,
+                  fit: BoxFit.fill,
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Column(
+                children: [
+                  Spacer(),
+                  GreetingText(darkMode: true),
+                  Spacer(),
+                ],
+              ),
+            );
+          }
+          return Row(
+            children: [
+              Expanded(
+                child: AspectRatio(
+                  aspectRatio: 2 / 3,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.memory(
+                      GreetingController.instance.greetingImage!,
+                      height: double.infinity,
+                      fit: BoxFit.fitHeight,
+                      alignment: Alignment.center,
+                    ),
+                  ),
+                ),
+              ),
+              const Expanded(child: GreetingText()),
+            ],
+          );
+        });
   }
 }
 
 class GreetingText extends StatelessWidget {
   const GreetingText({super.key, this.darkMode = false});
 
-  /// Used when text is displayed above the card image.
   final bool darkMode;
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(
-      color: darkMode ? Palette.cardOverlay : Colors.transparent,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 48),
-        child: Text(
-          'Lorem ipsum dolor sit amet, consectetur '
-          'adipiscing elit. Sed ac nunc sit amet nunc!',
-          style: GoogleFonts.lato(
-            textStyle: Theme.of(context).textTheme.headlineMedium,
-            fontWeight: FontWeight.w600,
-            color: darkMode ? Colors.white : Palette.labelText,
+    return ListenableBuilder(
+      listenable: GreetingController.instance,
+      builder: (context, _) {
+        return ColoredBox(
+          color: darkMode ? Palette.cardOverlay : Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 48),
+            child: Text(
+              GreetingController.instance.greetingText ?? '',
+              style: GoogleFonts.lato(
+                textStyle: Theme.of(context).textTheme.headlineMedium,
+                fontWeight: FontWeight.w600,
+                color: darkMode ? Colors.white : Palette.labelText,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
-          textAlign: TextAlign.center,
-        ),
-      ),
+        );
+      },
     );
   }
 }

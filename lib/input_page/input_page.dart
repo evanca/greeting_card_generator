@@ -1,9 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:greeting_card_generator_sandbox/output_page/output_page.dart';
 import 'package:greeting_card_generator_sandbox/ui/theme.dart';
 
+import '../greeting/greeting_controller.dart';
+import '../greeting/greeting_service.dart';
 import 'models/form_input.dart';
 import 'models/occasion.dart';
 
@@ -35,15 +36,29 @@ class _InputPageState extends State<InputPage> {
         tone: _tone,
         additionalNotes: _additionalNotes,
       );
-      // TODO: Generate greeting card
+
+      GreetingService().generateGreeting(formInput).then((output) {
+        final controller = GreetingController.instance;
+        controller.setError(null); // Clear any previous errors
+
+        if (output.$1 != null) {
+          controller.setGreetingText(output.$1!);
+        } else {
+          controller.setError(_errorText);
+        }
+
+        if (output.$2 != null) {
+          controller.setGreetingImage(output.$2!);
+        } else {
+          controller.setError(_errorText);
+        }
+      });
+
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => const OutputPage(),
         ),
       );
-      if (kDebugMode) {
-        print(formInput);
-      }
     }
   }
 
