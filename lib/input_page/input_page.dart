@@ -37,7 +37,7 @@ class _InputPageState extends State<InputPage> {
         additionalNotes: _additionalNotes,
       );
 
-      await GreetingController.instance.generateGreeting(formInput, _errorText);
+      GreetingController.instance.generateGreeting(formInput, _errorText);
 
       Navigator.of(context).push(
         MaterialPageRoute(
